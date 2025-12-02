@@ -1,0 +1,17 @@
+#1
+
+senior_count <- data$cbms_person_record %>%
+  filter(a05_age >= 60) %>% 
+  group_by(barangay_code) %>%
+  summarise(senior_citizen_count = n())
+
+glimpse(senior_count)
+
+
+#2
+homeless_households <- data$cbms_household_record %>%
+  filter(data$cbms_household_record[153] == 8) %>%
+  group_by(barangay_code) %>%
+  summarise(homeless_count = n())
+
+glimpse(homeless_households)
