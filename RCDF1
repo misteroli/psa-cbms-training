@@ -1,0 +1,61 @@
+
+#1
+library(rcdf)
+
+env <- read_env() 
+
+password <- env$PRIVATE_KEY_PW 
+
+decryption_key <- "data/sample-rcdf/RSA Keys/1001319-private-key.pem"
+
+data <- read_rcdf(
+  path = "data/sample-rcdf/1001319 Sumilao.rcdf", 
+  decryption_key = decryption_key,
+  password = password
+)
+
+
+#2
+data <- read_rcdf(
+  path = "data/sample-rcdf/1001319 Sumilao.rcdf", 
+  decryption_key = decryption_key,
+  password = password, 
+  return_meta = TRUE # include metadata
+)
+attributes(data)
+
+
+#3
+data_dictionary <- get_rcdf_metadata(
+  path = "data/sample-rcdf/1001319 Sumilao.rcdf",
+  key = "dictionary"
+)
+
+
+#4
+data_dictionary_filtered <- data_dictionary %>%
+  filter(str_detect(variable_name, "^(a01|a03|e)"))
+
+glimpse(data_dictionary_filtered)
+View(data_dictionary)
+
+#5
+data_dictionary_filtered <- data_dictionary %>%
+  filter(type %in% c("c","i"))
+
+glimpse(data_dictionary_filtered) 
+
+
+#6
+relation_to_hh_head_valueset <- data_dictionary %>%
+  filter(variable_name == "a02_relation_to_hh_head") %>%
+  pull(valueset) %>%
+  .[[1]]
+
+#or 
+
+relation_to_hh_head_valueset <- data_dictionary[
+  data_dictionary$variable_name == "a02_relation_to_hh_head",
+]$valueset[[1]]
+
+glimpse(relation_to_hh_head_valueset)
