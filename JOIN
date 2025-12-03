@@ -1,0 +1,60 @@
+#1
+
+library(dplyr)
+library(rcdf)
+
+env <- read_env()
+password <- env$PRIVATE_KEY_PW
+decryption_key <- "data/sample-rcdf/RSA Keys/1001319-private-key.pem"
+rcdf_file <- "data/sample-rcdf/1001319 Sumilao.rcdf"
+
+data <- read_rcdf(
+  path = rcdf_file,
+  decryption_key = decryption_key,
+  password = password,
+  return_meta = TRUE
+)
+
+person_record <- data$cbms_person_record |> 
+  filter(d07_tvet_graduate == 1) |>
+  select(uuid, region_code, province_code, city_mun_code, barangay_code, a01_first_name, a01_middle_name, a01_last_name, a05_age, a03_sex)
+
+tvet_record <- data$cbms_person_record_tvet |> 
+  select(uuid, region_code, province_code, city_mun_code, barangay_code, d09_tvet_course)
+
+joined_data <- person_record |> 
+  left_join(tvet_record, by = c("uuid", "region_code", "province_code", "city_mun_code", "barangay_code")) |> 
+  mutate(full_name = paste(a01_first_name, a01_middle_name, a01_last_name)) |> 
+  select(full_name, a05_age, a03_sex, d09_tvet_course)
+
+View(joined_data)
+View(data$cbms_person_record)
+
+
+#2
+library(dplyr)
+library(readr)
+
+section_q_2022 <- read_delim("data/sample-txt/SECTION_Q.TXT", delim = "\t") |> rename_all(tolower)
+section_r_2022 <- read_delim("data/sample-txt/SECTION_R.TXT", delim = "\t") |> rename_all(tolower)
+
+household_housing_info <- section_q_2022 |> 
+  mutate(
+    area_code_old = paste0(region_code, province_code, city_mun_code, barangay_code)
+  ) |> 
+  left_join(
+    section_r_2022 |> mutate(area_code_old = paste0(region_code, province_code, city_mun_code, barangay_code)),
+    by = "area_code_old"
+  ) |> 
+  select(
+    area_code = area_code_old,
+    main_water_source = q01_main_water,          
+    drinking_water_source = q03_drinking_water,
+    toilet_facility = q14_toilet_facility,
+    building_type = r01_building_type,
+    roof_material = r03_roof,
+    outer_wall_material = r04_outer_walls,
+    floor_material = r05_floor_finishing
+  )
+
+View(household_housing_info)
