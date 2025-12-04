@@ -1,0 +1,89 @@
+
+
+#tsg #1 EXERCISE
+library(tsg) 
+View(data$cbms_household_record)
+#1
+View(
+data$cbms_person_record %>%
+  generate_frequency(
+    a05_age_group_five_years,
+    add_cumulative = TRUE,
+    add_cumulative_percent = TRUE,
+    position_total = "top"
+  )
+)
+
+
+
+#2
+View(
+data$cbms_person_record %>%
+  filter(a02_relation_to_hh_head == 1) %>%
+  generate_frequency(
+    a11_hgc_group
+  )
+)
+
+
+
+#3
+View(
+data$cbms_household_record %>%
+  generate_frequency(
+    o03_roof_strength,
+    o04_outer_walls_strength,
+    o06_floor_strength, 
+    collapse_list = TRUE
+  )
+)
+
+
+#4
+data$cbms_household_record |>
+  group_by(barangay_code) |>
+  generate_frequency(o11_electricity, group_as_list = TRUE)
+
+
+
+#tsg #2 EXERCISE
+
+#1: Employment, unemployment, and underemployment rates by sex, grouped by barangay.
+library(dplyr)
+library(rcdf)
+
+data$cbms_person_record %>%
+  mutate(
+    emp_status = case_when(
+      e01_employment_status == 1 & e12_want_more_hours == 1 ~ "Underemployed",
+      e01_employment_status == 1 ~ "Employed",
+      e01_employment_status == 2 ~ "Unemployed"
+    )
+  ) %>%
+  group_by(barangay_code) %>%
+  generate_crosstab(emp_status, 
+                    a03_sex,
+                    group_as_list = TRUE)
+
+
+
+#2: Perception of safety of the respondents by barangay.
+View(data$cbms_household_record |>
+  generate_crosstab(l01_safe_walking_alone, barangay_code)
+)
+
+#3: Pregnant and lactating/breastfeeding mothers below 20 years old by basic literacy.
+View(data$cbms_person_record %>%
+       filter(a05_age < 20 & b09_lactating_mother == 1) %>%
+       generate_crosstab(b09_lactating_mother,
+                         a10_simple_literacy)
+)
+
+
+
+#4: Reason for not attending school by sex, grouped by barangay.
+View(data$cbms_person_record %>%
+  group_by(barangay_code) %>%
+  generate_crosstab(d06_reason_not_attending_school, 
+                    a03_sex  )
+)
