@@ -121,9 +121,10 @@ pregnant_basic_literacy <- data$cbms_person_record %>%
 
 
 #===============================================================================
-# 5. Reason for not attending school by sex, grouped by barangay.
+# 4. Reason for not attending school by sex, grouped by barangay.
 #===============================================================================
 reason_not_attending <- data$cbms_person_record %>%
   group_by(barangay_code) %>%
   generate_crosstab(d06_reason_not_attending_school,
                     a03_sex  )
+
